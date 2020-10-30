@@ -30,8 +30,8 @@ public class CalcV1 extends JFrame
     private void setGUI()
     {
         windowSetting();
-        calculatorScreenSetting();
-        calculatorKeyboardSetting();
+        screenSetting();
+        keyboardSetting();
     }
     private void windowSetting()
     {
@@ -46,7 +46,7 @@ public class CalcV1 extends JFrame
         }
         setTitle("Calculator");
     }
-    private void calculatorScreenSetting()
+    private void screenSetting()
     {
         screen.setLineWrap(true);
         screen.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
@@ -55,17 +55,16 @@ public class CalcV1 extends JFrame
         screen.setBackground(Color.getHSBColor(0,0,0.9f));
         screen.setPreferredSize(new Dimension(getWidth(),250));
         JScrollPane scroll = new JScrollPane(screen, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        add(scroll, BorderLayout.NORTH);
+        add(scroll, BorderLayout.NORTH);            //scroll doesn't work
     }
-    private void calculatorKeyboardSetting()
+    private void keyboardSetting()
     {
         ActionListener buttonListener = new ButtonListener();
         JPanel keyBoard = new JPanel(new GridLayout(5,4));
-        for(char buttonSymbols: buttonSymbols)
+        for(char btnSym: buttonSymbols)
         {
             JButton button = new JButton();
-
-            switch (buttonSymbols){
+            switch (btnSym){
                 case 'd':
                     button.setText("DEL");
                     break;
@@ -76,7 +75,7 @@ public class CalcV1 extends JFrame
                     button.setText("00");
                     break;
                 default:
-                    button.setText(String.valueOf(buttonSymbols));
+                    button.setText(String.valueOf(btnSym));
                     break;
             }
             button.setBackground(Color.DARK_GRAY);
@@ -92,60 +91,64 @@ public class CalcV1 extends JFrame
         @Override
         public void actionPerformed(ActionEvent e)
         {
-            String buttonSym = e.getActionCommand();
-            switch (e.getActionCommand())
-            {
-                case "(":
-                    if(!isLastSymNum(scnEqs) && !isLastSym(scnEqs,'.', ')'))
-                        scnEqs += buttonSym;
-                    break;
-                case ")":
-                    if(hasOpened(scnEqs,'(', ')'))
-                    {
-                        removeLastNotNum();
-                        scnEqs += buttonSym;
-                    }
-                    break;
-                case "C":
-                    scnEqs = "";
-                    break;
-                case "CE":
-                    int indexRemoving = scnEqs.lastIndexOf(lastStrNumOF(scnEqs));
-                    scnEqs = scnEqs.substring(0, indexRemoving);
-                    break;
-                case "DEL":
-                    removeLastChar();
-                    break;
-                case ".":
-                    dotClicked(buttonSym);
-                    break;
-                case "-":
-                    if(!isLastSym(scnEqs, '('))
-                        removeLastNotNum();
-                    scnEqs += buttonSym;
-                    break;
-                default:
-                    if(isNumeric(buttonSym.charAt(0)))
-                    {
-                        if(!isLastSym(scnEqs,'.') && lastStrNumOF(scnEqs).equals("0"))
-                            removeLastChar();
-                        if (!isLastSym(scnEqs,')'))
-                            scnEqs += buttonSym;
-                    }
-                    else if (hasNum(scnEqs))
-                    {
-                        removeLastNotNum();
-                        scnEqs += buttonSym;
-                    }
-                    break;
-            }
-            scnEqs = scnEqs.replace("--", "-");
-            if(countOf(scnEqs,'(') < countOf(scnEqs,')'))
-                removeLastChar();
-            createInsideEquation();
-            screen.setText(scnEqs + "\n= " + calc());
-//            info(buttonSym);
+            btnSetting(e.getActionCommand());
+//          info(buttonSym);
         }
+    }
+    private void btnSetting(String buttonSym)
+    {
+        switch (buttonSym)
+        {
+            case "(":
+                if(!isLastSymNum(scnEqs) && !isLastSym(scnEqs,'.', ')'))
+                    scnEqs += buttonSym;
+                break;
+            case ")":
+                if(hasOpened(scnEqs,'(', ')'))
+                {
+                    removeLastNotNum();
+                    scnEqs += buttonSym;
+                }
+                break;
+            case "C":
+                scnEqs = "";
+                break;
+            case "CE":
+                int indexRemoving = scnEqs.lastIndexOf(lastScrNum(scnEqs));
+                scnEqs = scnEqs.substring(0, indexRemoving);
+                break;
+            case "DEL":
+                removeLastChar();
+                break;
+            case ".":
+                dotClicked(buttonSym);
+                break;
+            case "-":
+                if(!isLastSym(scnEqs, '('))
+                    removeLastNotNum();
+                scnEqs += buttonSym;
+                break;
+            default:
+                if(isNumeric(buttonSym.charAt(0)))
+                {
+                    if(!isLastSym(scnEqs,'.') && lastScrNum(scnEqs).equals("0"))
+                        removeLastChar();
+                    if (!isLastSym(scnEqs,')'))
+                        scnEqs += buttonSym;
+                }
+                else if (hasNum(scnEqs))
+                {
+                    removeLastNotNum();
+                    scnEqs += buttonSym;
+                }
+                break;
+        }
+        scnEqs = scnEqs.replace("--", "-");
+        scnEqs = scnEqs.replace("()", "");
+        if(countOf(scnEqs,'(') < countOf(scnEqs,')'))
+            removeLastChar();
+        createInsideEquation();
+        screen.setText(scnEqs + "\n= " + calc());
     }
     private boolean isEmpty(String s)
     {
@@ -162,7 +165,7 @@ public class CalcV1 extends JFrame
     }
     private boolean hasNum(String s)
     {
-        return !lastStrNumOF(s).equals("");
+        return !lastScrNum(s).equals("");
     }
     private char lastSymOf(String s)
     {
@@ -184,7 +187,6 @@ public class CalcV1 extends JFrame
         }
         for(int i = idLastSym; i < s.length(); i++)
         {
-
             if (!isNumeric(s.charAt(i)) && s.charAt(i) != '.' && s.charAt(i) != '-' && s.charAt(i) != 'E')
                 return s.substring(idLastSym, i);
         }
@@ -209,7 +211,6 @@ public class CalcV1 extends JFrame
         {
             if(!isNumeric(s.charAt(i)) && s.charAt(i) != '.' && s.charAt(i) != '-' && s.charAt(i) != 'E')
                 return s.substring(i + 1, id + 1);
-
         }
         return s.substring(0, id + 1);
     }
@@ -286,9 +287,9 @@ public class CalcV1 extends JFrame
             );
         }
     */
-    private String lastScrNum(String s)
-    {
-        int id = idLastNumOF(s);
+    private String lastScrNum(String s) //this method duplicates lastStrNumOF, but it recognizes a minus sign as action
+    {                                   //lastStrNumOf is used for calculating (minus is piece of negative numbers)
+        int id = idLastNumOF(s);        //lastScrNum is used for correct setting of the sign on the screen (minus is action, which separates numbers)
         if(id == -1)
             return "";
         for(int i = id; i != -1; i--)
@@ -365,7 +366,6 @@ public class CalcV1 extends JFrame
             while(firstActionOF(s) != '?' || s.indexOf(String.valueOf(lastActionOf(s))) > 0)
             {
                 s = s.replace("--", "+");
-
                 double res = 0;
                 int idFirstAction = idFirstActionOf(s);
                 if(s.indexOf(MULT) > s.indexOf(DIV))
@@ -390,7 +390,7 @@ public class CalcV1 extends JFrame
                 int beginningOldStr = idFirstAction - lastStrNumOF(s.substring(0,idFirstAction)).length();
                 int endOldSrt = idFirstAction + firstStrNumOf(s.substring(idFirstAction + 1)).length();
                 String oldStr = s.substring(beginningOldStr, endOldSrt + 1);
-                oldStr = oldStr.replace("+", "\\+"); //for correct work of replaceFirst method
+                oldStr = oldStr.replace("+", "\\+"); //for correct work of the replaceFirst method
                 s = s.replaceFirst(oldStr, String.valueOf(res));
                 if (s.contains("Infinity"))
                     return null;
