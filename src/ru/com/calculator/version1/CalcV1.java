@@ -1,9 +1,12 @@
 package ru.com.calculator.version1;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
 public class CalcV1 extends JFrame
 {
@@ -36,6 +39,12 @@ public class CalcV1 extends JFrame
         setBounds(500, 200, 340, 600);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
+        try {
+            setIconImage(ImageIO.read(new File("res/icon.png")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        setTitle("Calculator");
     }
     private void calculatorScreenSetting()
     {
